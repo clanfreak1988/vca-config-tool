@@ -23,6 +23,8 @@ namespace vca_config_tool
         public MainWindow()
         {
             InitializeComponent();
+
+            Console.WriteLine("Hello World");
         }
     }
 }
