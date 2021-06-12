@@ -22,6 +22,7 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Net;
 
 namespace vca_config_tool
 {
@@ -35,10 +36,11 @@ namespace vca_config_tool
         private readonly string zipPath = string.Empty;
         private readonly List<LuaFile> luaAL= new List<LuaFile>();
         private string currentVCATransmissionFileString;
+        public static WebClient wc = new WebClient();
 
         public MainWindow() {
             InitializeComponent();
-            _ = downloadGithubTransmissionAsync();
+            DownloadGithubTransmissionAsync();
 
             // Create the needed subfolder for the zip and transmission part
             CreateSubFolders();
@@ -154,14 +156,14 @@ namespace vca_config_tool
             }
         }
 
-        private async Task downloadGithubTransmissionAsync() {
+        private void DownloadGithubTransmissionAsync() {
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.UserAgent.Add(
                 new ProductInfoHeaderValue("MyApplication", "1"));
             var repo = "clanfreak1988/VCA_gearbox_collection";
         //https://github.com/clanfreak1988/VCA_gearbox_collection/tree/main/FS19
             var contentsUrl = $"https://api.github.com/repos/{repo}/contents";
-            var contentsJson = await httpClient.GetStringAsync(contentsUrl);
+            var contentsJson = httpClient.GetStringAsync(contentsUrl).GetAwaiter().GetResult();
             var contents = (JArray)JsonConvert.DeserializeObject(contentsJson);
             foreach (var file in contents) {
                 var fileType = (string)file["type"];
@@ -169,6 +171,12 @@ namespace vca_config_tool
                     var directoryContentsUrl = (string)file["url"];
                     // use this URL to list the contents of the folder
                     Console.WriteLine($"DIR: {directoryContentsUrl}");
+                    var contentsJson2 = httpClient.GetStringAsync(contentsUrl + "\\" + (string)file["name"]).GetAwaiter().GetResult();
+                    var content = (JArray)JsonConvert.DeserializeObject(contentsJson2);
+                    foreach (var file2 in content) {
+                        var uri = new Uri((string)file2["download_url"]);
+                        wc.DownloadFile(uri, currentScriptPath + "tmp\\" + (string)file2["name"]);
+                    }
                 } else if (fileType == "file") {
                     var downloadUrl = (string)file["download_url"];
                     // use this URL to download the contents of the file
