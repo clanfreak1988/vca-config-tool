@@ -1,19 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Diagnostics;
-using System.Collections;
 using System.IO;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
@@ -23,58 +12,61 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net;
+using ListViewItem = System.Windows.Controls.ListViewItem;
 
-namespace vca_config_tool
-{
+namespace vca_config_tool {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
         private readonly string currentScriptPath = AppDomain.CurrentDomain.BaseDirectory;
-        private readonly string zipFilePath = string.Empty;
-        private readonly string luaFilePath = string.Empty;
-        private readonly string zipPath = string.Empty;
-        private readonly List<LuaFile> luaAL= new List<LuaFile>();
+        private string zipFilePath = string.Empty;
+        private string luaFilePath = string.Empty;
+        private string zipPath = string.Empty;
+        private List<LuaFile> luaAL= new List<LuaFile>();
         private string currentVCATransmissionFileString;
-        public static WebClient wc = new WebClient();
+        private static WebClient wc = new WebClient();
 
         public MainWindow() {
             InitializeComponent();
-            DownloadGithubTransmissionAsync();
-
+            //wtransmissionListView.ItemsSource = luaAL;
             // Create the needed subfolder for the zip and transmission part
-            CreateSubFolders();
-            clearFolder(currentScriptPath + "VCA");
+            //eateSubFolders();
+            //ClearFolder(currentScriptPath + "VCA");
 
             // We unzip the file in the VCA folder and know we have this lua file
             luaFilePath = currentScriptPath + "VCA\\vehicleControlAddonTransmissions.lua";
 
-            // Selecting the path to the vca zip file
-            /** using (OpenFileDialog openFileDialog = new OpenFileDialog()) {
-                 openFileDialog.InitialDirectory = "C:\\Users\\Andre\\source\\repos";
-                 openFileDialog.Filter = "Zipfile|*.zip";
-
-                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
-                     zipFilePath = openFileDialog.FileName;
-                     zipPath = System.IO.Path.GetFullPath(zipFilePath);
-                 }
-             }
-             UnzipFile(zipFilePath);
-            */
-            UnzipFile("C:\\Users\\Andre\\source\\repos\\FS19_VehicleControlAddon_github.zip");
-            // This should filled by the downloaded transmission luas
-            LuaFile luaFile = new LuaFile("TestFile.lua", "ManualGears");
-
-            // Read the current transmission file
-            currentVCATransmissionFileString = File.ReadAllText(luaFilePath, Encoding.UTF8);
-
-            GetAllUsedTransmissions();
             // Read in from all selected transmission of the combobox and iterat over it
             // TODO: Check which exists
-            var newTransmission = File.ReadAllText("C:\\Users\\Andre\\source\\repos\\vca-config-tool\\Renault_Ares_836_GIMA_Quadrishift.lua");
-
+            //var newTransmission = File.ReadAllText("C:\\Users\\Andre\\source\\repos\\vca-config-tool\\Renault_Ares_836_GIMA_Quadrishift.lua");
             Console.WriteLine("Fin");
 
+        }
+
+        private void DownloadButtonClick(object sender, RoutedEventArgs e) {
+            //DownloadGithubTransmissionAsync();
+            ReadDownloadedTransmissions();
+        }
+
+        private void SelectZipButtonClick(object sender, RoutedEventArgs e) {
+            // Selecting the path to the vca zip file
+           /** using (OpenFileDialog openFileDialog = new OpenFileDialog()) {
+                openFileDialog.InitialDirectory = "C:\\Users\\Andre\\source\\repos";
+                openFileDialog.Filter = "Zipfile|*.zip";
+
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                    zipFilePath = openFileDialog.FileName;
+                    zipPath = System.IO.Path.GetFullPath(zipFilePath);
+                }
+            }
+            UnzipFile(zipFilePath);
+           */
+            // Read the current transmission file
+            currentVCATransmissionFileString = File.ReadAllText(luaFilePath, Encoding.UTF8);
+            GetAllUsedTransmissions();
+            DownloadBtn.IsEnabled = true;
+            ZipFileBtn.IsEnabled = true;
         }
 
         /// <summary>
@@ -85,6 +77,7 @@ namespace vca_config_tool
             Directory.CreateDirectory("VCA");
             string targetPath = currentScriptPath + "VCA\\";
             ZipFile.ExtractToDirectory(pathToZip, targetPath);
+            
         }
 
         private void ZippingFile() {
@@ -124,9 +117,11 @@ namespace vca_config_tool
             var result = Regex.Matches(currentVCATransmissionFileString, "params.=.+name\\s+=\\s+\"(.*)\"");
             foreach (Match match in regex.Matches(currentVCATransmissionFileString)) {
                 if(match.Groups[1].Value != "OWN") {
-                    listTransmission.Add(match.Groups[1].Name);
+                    luaAL.Add(new LuaFile(true, match.Groups[1].Value));
+                    listTransmission.Add(match.Groups[1].Value);
                 }
             }
+            transmissionListView.ItemsSource = luaAL;
             return listTransmission;
         }
 
@@ -143,7 +138,7 @@ namespace vca_config_tool
         /// Cleaning the folder VCA, when maybe was a previous run
         /// </summary>
         /// <param name="FolderName"></param>
-        private void clearFolder(string FolderName) {
+        private void ClearFolder(string FolderName) {
             DirectoryInfo dir = new DirectoryInfo(FolderName);
 
             foreach (FileInfo fi in dir.GetFiles()) {
@@ -151,9 +146,18 @@ namespace vca_config_tool
             }
 
             foreach (DirectoryInfo di in dir.GetDirectories()) {
-                clearFolder(di.FullName);
+                ClearFolder(di.FullName);
                 di.Delete();
             }
+        }
+
+        private void ReadDownloadedTransmissions() {
+            DirectoryInfo tmpDir = new DirectoryInfo(currentScriptPath + "tmp");
+            foreach(FileInfo fi in tmpDir.GetFiles()) {
+                luaAL.Add(new LuaFile(false, fi.Name.Split('.')[0], File.ReadAllText(fi.FullName)));
+            }
+            transmissionListView.ItemsSource = null;
+            transmissionListView.ItemsSource = luaAL;
         }
 
         private void DownloadGithubTransmissionAsync() {
@@ -161,7 +165,6 @@ namespace vca_config_tool
             httpClient.DefaultRequestHeaders.UserAgent.Add(
                 new ProductInfoHeaderValue("MyApplication", "1"));
             var repo = "clanfreak1988/VCA_gearbox_collection";
-        //https://github.com/clanfreak1988/VCA_gearbox_collection/tree/main/FS19
             var contentsUrl = $"https://api.github.com/repos/{repo}/contents";
             var contentsJson = httpClient.GetStringAsync(contentsUrl).GetAwaiter().GetResult();
             var contents = (JArray)JsonConvert.DeserializeObject(contentsJson);

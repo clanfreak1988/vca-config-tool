@@ -10,10 +10,17 @@ namespace vca_config_tool {
 
         private string fileName;
         private string transmissionName;
-        private readonly List<LuaFile> luaFiles;
-        public LuaFile(string nameOfFile, string NameOfTransmission) {
-            fileName = nameOfFile;
+        private bool exists;
+        private List<LuaFile> luaFiles;
+        public LuaFile(bool existing, string NameOfTransmission, string transmissionContent) {
+            fileName = transmissionContent;
             transmissionName = NameOfTransmission;
+            exists = existing;
+        }
+
+        public LuaFile(bool existing, string nameOfFile) {
+            exists = existing;
+            transmissionName = nameOfFile;
         }
 
         public string TransmissionName {
@@ -25,12 +32,17 @@ namespace vca_config_tool {
             set => fileName = value;
         }
 
+        public bool Exists {
+            get => exists;
+            set => exists = value;
+        }
+
         public IEnumerator<LuaFile> GetEnumerator() {
             return luaFiles.GetEnumerator();
         }
-
         IEnumerator IEnumerable.GetEnumerator() {
-            throw new NotImplementedException();
+            
+            throw new Exception();
         }
     }
 }
