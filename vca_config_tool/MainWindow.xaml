@@ -27,14 +27,14 @@
                 <Button.Content>Add and Zip File</Button.Content>
                 <Button.IsEnabled>false</Button.IsEnabled>
             </Button>
-            <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Height="300" Margin="20,58,0,0" VerticalAlignment="Top" Width="240">
+            <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Height="300" Width="400" Margin="20,58,0,0" VerticalAlignment="Top">
                 <ListView.View>
                     <GridView>
                         <GridView.Columns>
                             <GridViewColumn Header="Exist" Width="50">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <CheckBox IsChecked="{Binding Exists}"/>
+                                        <CheckBox IsChecked="{Binding Exists}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

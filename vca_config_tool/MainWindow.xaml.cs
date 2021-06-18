@@ -13,6 +13,8 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net;
 using ListViewItem = System.Windows.Controls.ListViewItem;
+using CheckBox = System.Windows.Forms.CheckBox;
+using System.Windows.Media;
 
 namespace vca_config_tool {
     /// <summary>
@@ -23,7 +25,10 @@ namespace vca_config_tool {
         private string zipFilePath = string.Empty;
         private string luaFilePath = string.Empty;
         private string zipPath = string.Empty;
-        private List<LuaFile> luaAL= new List<LuaFile>();
+        private List<LuaFile> luaAL = new List<LuaFile>();
+        private List<LuaFile> checkedList = new List<LuaFile>();
+        private List<LuaFile> unCheckedList = new List<LuaFile>();
+        private List<LuaFile> currentTransmission = new List<LuaFile>();
         private string currentVCATransmissionFileString;
         private static WebClient wc = new WebClient();
 
@@ -64,7 +69,7 @@ namespace vca_config_tool {
            */
             // Read the current transmission file
             currentVCATransmissionFileString = File.ReadAllText(luaFilePath, Encoding.UTF8);
-            GetAllUsedTransmissions();
+            currentTransmission = GetAllUsedTransmissions();
             DownloadBtn.IsEnabled = true;
             ZipFileBtn.IsEnabled = true;
         }
@@ -111,14 +116,14 @@ namespace vca_config_tool {
         /// Collect all current Transmission
         /// </summary>
         /// <returns> A list of the current transmission</returns>
-        private List<string> GetAllUsedTransmissions() {
-            List<string> listTransmission = new List<string>();
+        private List<LuaFile> GetAllUsedTransmissions() {
+            List<LuaFile> listTransmission = new List<LuaFile>();
             Regex regex= new Regex("params.=.+name\\s+=\\s+\"(.*)\"");
             var result = Regex.Matches(currentVCATransmissionFileString, "params.=.+name\\s+=\\s+\"(.*)\"");
             foreach (Match match in regex.Matches(currentVCATransmissionFileString)) {
                 if(match.Groups[1].Value != "OWN") {
                     luaAL.Add(new LuaFile(true, match.Groups[1].Value));
-                    listTransmission.Add(match.Groups[1].Value);
+                    listTransmission.Add(new LuaFile(true, match.Groups[1].Value));
                 }
             }
             transmissionListView.ItemsSource = luaAL;
@@ -186,6 +191,25 @@ namespace vca_config_tool {
                     Console.WriteLine($"DOWNLOAD: {downloadUrl}");
                 }
             }
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e) {
+            ListViewItem listViewItem = GetVisualAncestor<ListViewItem>((DependencyObject)sender);
+
+            transmissionListView.SelectedValue = transmissionListView.ItemContainerGenerator.ItemFromContainer(listViewItem);
+            LuaFile selectedItem = (LuaFile)transmissionListView.SelectedItem;
+            if (checkedList.Contains(selectedItem)) {
+                checkedList.Remove(selectedItem);
+            } else {
+                checkedList.Add(selectedItem);
+            }
+        }
+        private static T GetVisualAncestor<T>(DependencyObject o) where T : DependencyObject {
+            do {
+                o = VisualTreeHelper.GetParent(o);
+            } while (o != null && !typeof(T).IsAssignableFrom(o.GetType()));
+
+            return (T)o;
         }
     } 
 }
