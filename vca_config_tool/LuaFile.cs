@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 namespace vca_config_tool {
     public class LuaFile : IEnumerable<LuaFile> {
 
-        private string fileName;
+        private string transmission;
         private string transmissionName;
         private bool exists;
         private List<LuaFile> luaFiles;
-        public LuaFile(bool existing, string NameOfTransmission, string transmissionContent) {
-            fileName = transmissionContent;
-            transmissionName = NameOfTransmission;
+
+        public LuaFile(string action, bool existing, string NameOfTransmission, string transmissionContent) {
+            TodoAction = action;
             exists = existing;
+            transmissionName = NameOfTransmission;
+            transmission = transmissionContent;
         }
 
         public LuaFile(bool existing, string nameOfFile) {
@@ -27,15 +29,17 @@ namespace vca_config_tool {
             get => transmissionName;
             set => transmissionName = value;
         }
-        public string FileName {
-            get => fileName;
-            set => fileName = value;
+        public string Transmission {
+            get => transmission;
+            set => transmission = value;
         }
 
         public bool Exists {
             get => exists;
             set => exists = value;
         }
+
+        public string TodoAction { get; set; }
 
         public IEnumerator<LuaFile> GetEnumerator() {
             return luaFiles.GetEnumerator();

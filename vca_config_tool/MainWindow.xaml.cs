@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using System.Net;
 using ListViewItem = System.Windows.Controls.ListViewItem;
 using CheckBox = System.Windows.Forms.CheckBox;
+using ComboBox = System.Windows.Forms.ComboBox;
 using System.Windows.Media;
 
 namespace vca_config_tool {
@@ -95,7 +96,7 @@ namespace vca_config_tool {
         /// <param name="selectedItems"></param>
         private void IterateOverSelection(List<LuaFile> selectedItems) {
             foreach (LuaFile lua in selectedItems) {
-                AddTransmission(lua.FileName);
+                AddTransmission(lua.Transmission);
             }
         }
 
@@ -118,12 +119,15 @@ namespace vca_config_tool {
         /// <returns> A list of the current transmission</returns>
         private List<LuaFile> GetAllUsedTransmissions() {
             List<LuaFile> listTransmission = new List<LuaFile>();
-            Regex regex= new Regex("params.=.+name\\s+=\\s+\"(.*)\"");
-            var result = Regex.Matches(currentVCATransmissionFileString, "params.=.+name\\s+=\\s+\"(.*)\"");
+            Regex regex = new Regex("params.=.+name\\s+=\\s+\"(.*)\"");
+            //var result = Regex.Matches(currentVCATransmissionFileString, "params.=.+name\\s+=\\s+\"(.*)\"");
             foreach (Match match in regex.Matches(currentVCATransmissionFileString)) {
                 if(match.Groups[1].Value != "OWN") {
-                    luaAL.Add(new LuaFile(true, match.Groups[1].Value));
-                    listTransmission.Add(new LuaFile(true, match.Groups[1].Value));
+                    //Match matchTransmission = Regex.Match(currentVCATransmissionFileString, "(\\s+{.+class.+=.+vehicleControlAddonTransmissionBase.+\"" + match.Groups[1].Value + "\" },)", RegexOptions.Singleline);
+                    Match matchTransmission = Regex.Match(currentVCATransmissionFileString, "(\\s+{\\s+class\\s+=\\s+vehicleControlAddonTransmissionBase,\\s+params\\s+=\\s+{\\s+name\\s+=\\s+\"" + match.Groups[1].Value + "\".*text\\s+=\\s+\"" + match.Groups[1].Value + "\"\\s+},)", RegexOptions.Singleline);
+                    Console.WriteLine(matchTransmission.Groups[1].Value);
+                    luaAL.Add(new LuaFile("Exists", true, match.Groups[1].Value, matchTransmission.Groups[1].Value));
+                    listTransmission.Add(new LuaFile("Exists", true, match.Groups[1].Value, matchTransmission.Groups[1].Value));
                 }
             }
             transmissionListView.ItemsSource = luaAL;
@@ -159,7 +163,7 @@ namespace vca_config_tool {
         private void ReadDownloadedTransmissions() {
             DirectoryInfo tmpDir = new DirectoryInfo(currentScriptPath + "tmp");
             foreach(FileInfo fi in tmpDir.GetFiles()) {
-                luaAL.Add(new LuaFile(false, fi.Name.Split('.')[0], File.ReadAllText(fi.FullName)));
+                luaAL.Add(new LuaFile("Add",false, fi.Name.Split('.')[0], File.ReadAllText(fi.FullName)));
             }
             transmissionListView.ItemsSource = null;
             transmissionListView.ItemsSource = luaAL;
@@ -193,11 +197,18 @@ namespace vca_config_tool {
             }
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e) {
+        private void SetAction(object sender, RoutedEventArgs e) {
+            
+        }
+
+        /*private void CheckBox_Checked(object sender, RoutedEventArgs e) {
             ListViewItem listViewItem = GetVisualAncestor<ListViewItem>((DependencyObject)sender);
 
             transmissionListView.SelectedValue = transmissionListView.ItemContainerGenerator.ItemFromContainer(listViewItem);
             LuaFile selectedItem = (LuaFile)transmissionListView.SelectedItem;
+            if(selectedItem.TransmissionName.Equals("IVT")) {
+                
+            }
             if (checkedList.Contains(selectedItem)) {
                 checkedList.Remove(selectedItem);
             } else {
@@ -210,6 +221,6 @@ namespace vca_config_tool {
             } while (o != null && !typeof(T).IsAssignableFrom(o.GetType()));
 
             return (T)o;
-        }
+        }*/
     } 
 }

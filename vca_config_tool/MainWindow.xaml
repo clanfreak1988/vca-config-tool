@@ -1,9 +1,10 @@
-﻿<Window x:Class="vca_config_tool.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:vca_config_tool"
+        xmlns:System="clr-namespace:System;assembly=mscorlib" xmlns:Properties="clr-namespace:vca_config_tool.Properties" x:Class="vca_config_tool.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow" 
         Height="450" 
@@ -16,36 +17,44 @@
         CornerRadius="20"
         >
         <Grid>
-            <Button Name="SelectZipBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="20,10,0,380" Click="SelectZipButtonClick">
-                <Button.Content>Select Zip</Button.Content>
+            <Button x:Name="SelectZipBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="20,10,0,380" Click="SelectZipButtonClick">Select Zip</Button>
+            <Button x:Name="DownloadBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="120,10,0,380" Click="DownloadButtonClick">
+                <Button.IsEnabled>
+                    <System:Boolean>false</System:Boolean>
+                </Button.IsEnabled> Download
             </Button>
-            <Button Name="DownloadBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="120,10,0,380" Click="DownloadButtonClick">
-                <Button.Content>Download</Button.Content>
-                <Button.IsEnabled>false</Button.IsEnabled>
-            </Button>
-            <Button Name="ZipFileBtn" Width="110" Height="20" HorizontalAlignment="Left" Margin="220,10,0,380">
-                <Button.Content>Add and Zip File</Button.Content>
-                <Button.IsEnabled>false</Button.IsEnabled>
+            <Button x:Name="ZipFileBtn" Width="110" Height="20" HorizontalAlignment="Left" Margin="220,10,0,380">
+                <Button.IsEnabled>
+                    <System:Boolean>false</System:Boolean>
+                </Button.IsEnabled> Add and Zip File
             </Button>
             <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Height="300" Width="400" Margin="20,58,0,0" VerticalAlignment="Top">
                 <ListView.View>
                     <GridView>
-                        <GridView.Columns>
-                            <GridViewColumn Header="Exist" Width="50">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <CheckBox IsChecked="{Binding Exists}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Header="Transmission Name" Width="Auto">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding TransmissionName}"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                        </GridView.Columns>
+                        <GridViewColumn Header="Exist" Width="140">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox x:Name="cbAction" SelectedItem="{Binding TodoAction}" SelectedValuePath="Content" Width="120" SelectionChanged="SetAction">
+                                        <!--.ItemsSource="{Binding TodoAction}" -->
+                                        <ComboBox.DataContext>
+                                            <Properties:Resources/>
+                                        </ComboBox.DataContext>
+                                        <ComboBoxItem Content="-"/>
+                                        <ComboBoxItem Content="Add"/>
+                                        <ComboBoxItem Content="Remove"/>
+                                        <ComboBoxItem Content="Exists"/>
+
+                                    </ComboBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Transmission Name" Width="Auto">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding TransmissionName}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                     </GridView>
                 </ListView.View>
             </ListView>
