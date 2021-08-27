@@ -12,12 +12,24 @@ namespace vca_config_tool {
         private string transmissionName;
         private bool exists;
         private List<LuaFile> luaFiles;
+        private string todoAction;
+        private List<string> actionList;
+        private string nextAction;
 
-        public LuaFile(string action, bool existing, string NameOfTransmission, string transmissionContent) {
-            TodoAction = action;
+        public LuaFile(String currentAction, bool existing, string NameOfTransmission, string transmissionContent, string action) {
+            todoAction = currentAction;
             exists = existing;
             transmissionName = NameOfTransmission;
             transmission = transmissionContent;
+            actionList = new List<string>();
+            if (exists == true) {
+                actionList.Add("Exists");
+                actionList.Add("Remove");
+            } else {
+                actionList.Add("-");
+                actionList.Add("Add");
+            }
+           nextAction = action;
         }
 
         public LuaFile(bool existing, string nameOfFile) {
@@ -39,14 +51,22 @@ namespace vca_config_tool {
             set => exists = value;
         }
 
-        public string TodoAction { get; set; }
+        public String TodoAction {
+            get => todoAction;
+            set => todoAction = value;
+        }
 
+        public String NextAction {
+            get => nextAction;
+            set => nextAction = value;
+        }
         public IEnumerator<LuaFile> GetEnumerator() {
             return luaFiles.GetEnumerator();
         }
         IEnumerator IEnumerable.GetEnumerator() {
-            
             throw new Exception();
         }
+
+        public IEnumerable<string> ActionList => actionList;
     }
 }

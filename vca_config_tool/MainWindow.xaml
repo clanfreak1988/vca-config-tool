@@ -31,27 +31,17 @@
             <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Height="300" Width="400" Margin="20,58,0,0" VerticalAlignment="Top">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Exist" Width="140">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ComboBox x:Name="cbAction" SelectedItem="{Binding TodoAction}" SelectedValuePath="Content" Width="120" SelectionChanged="SetAction">
-                                        <!--.ItemsSource="{Binding TodoAction}" -->
-                                        <ComboBox.DataContext>
-                                            <Properties:Resources/>
-                                        </ComboBox.DataContext>
-                                        <ComboBoxItem Content="-"/>
-                                        <ComboBoxItem Content="Add"/>
-                                        <ComboBoxItem Content="Remove"/>
-                                        <ComboBoxItem Content="Exists"/>
-
-                                    </ComboBox>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Header="Transmission Name" Width="Auto">
-                            <GridViewColumn.CellTemplate>
+                        <GridViewColumn Header="Transmission Name" Width="Auto" DisplayMemberBinding="{Binding TransmissionName}">
+                            <!--<GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding TransmissionName}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>-->
+                        </GridViewColumn>
+                        <GridViewColumn Header="Action" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox x:Name="cbAction" Width="90" ItemsSource="{Binding ActionList}" SelectedItem="{Binding TodoAction}" SelectionChanged="cbAction_SelectionChanged" DropDownClosed="cbAction_DropDownClosed"></ComboBox>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
