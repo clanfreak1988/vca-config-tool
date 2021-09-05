@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Text.RegularExpressions;
 using System.Net.Http.Headers;
 using System.Net.Http;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net;
@@ -29,6 +30,7 @@ namespace vca_config_tool {
         private ObservableCollection<LuaFile> currentTransmission = new ObservableCollection<LuaFile>();
         private string currentVCATransmissionFileString;
         private static WebClient wc = new WebClient();
+        private readonly static string nameAndTextRegex = "params\\s+=\\s+.\\sname\\s+=\\s+\"([\\w\\d\\s-\\/\\*-\\.]*)\",.+?text\\s+=\\s+\"([\\w\\d\\s-\\/\\*-\\.]*)\"\\s*},";
 
         public MainWindow() {
             InitializeComponent();
@@ -88,7 +90,9 @@ namespace vca_config_tool {
         /// Create the zip file from the unzipped file
         /// </summary>
         private void ZippingFile() {
-            ZipFile.CreateFromDirectory("VCA\\", zipPath + "edit");
+            //File.Delete(zipPath);
+            var rand = new Random();
+            ZipFile.CreateFromDirectory("VCA\\", zipPath + rand.Next() + ".zip");
         }
 
         /// <summary>
@@ -137,13 +141,14 @@ namespace vca_config_tool {
         private ObservableCollection<LuaFile> GetAllUsedTransmissions() {
             
             ObservableCollection<LuaFile> listTransmission = new ObservableCollection<LuaFile>();
-            Regex regex = new Regex("params\\s+=\\s+.\\sname\\s+=\\s+\"([\\w\\d\\s-\\/]*)\",.+?text\\s+=\\s+\"([\\w\\d\\s-\\/]*)\"\\s+},", RegexOptions.Singleline);
+            //Regex regex = new Regex("params\\s+=\\s+.\\sname\\s+=\\s+\"([\\w\\d\\s-\\/\\*]*)\",.+?text\\s+=\\s+\"([\\w\\d\\s-\\/\\*]*)\"\\s+},", RegexOptions.Singleline);
+            Regex regex = new Regex(nameAndTextRegex, RegexOptions.Singleline);
             foreach (Match match in regex.Matches(currentVCATransmissionFileString)) {
                 Console.WriteLine(match.Groups[1].Value + " & " + match.Groups[2].Value);
-                if(match.Groups[1].Value != "OWN") {
+                if(match.Groups[2].Value != "own configuration") {
                     Match matchTransmission = Regex.Match(currentVCATransmissionFileString, "(\\s+\\{\\s+class\\s+=\\s+vehicleControlAddonTransmissionBase,\\s+params\\s+=\\s+\\{\\s+name\\s+=\\s+\\\"" + match.Groups[1].Value + "\\\".*text\\s+=\\s+\\\"" + match.Groups[2].Value + "\\\"\\s+\\},)", RegexOptions.Singleline);
-                    Console.WriteLine(matchTransmission.Groups[1].Value);
-                    listTransmission.Add(new LuaFile("Exists", true, match.Groups[1].Value, matchTransmission.Groups[1].Value, ""));
+                    Console.WriteLine(matchTransmission.Groups[2].Value);
+                    listTransmission.Add(new LuaFile("Exists", true, match.Groups[2].Value, matchTransmission.Groups[1].Value, ""));
                 }
             }
             return listTransmission;
@@ -179,10 +184,11 @@ namespace vca_config_tool {
             DirectoryInfo tmpDir = new DirectoryInfo(currentScriptPath + "tmp");
             foreach(FileInfo fi in tmpDir.GetFiles()) {
                 string fileContent = File.ReadAllText(fi.FullName);
-                Match transmissionNameMatch = Regex.Match(fileContent, "params\\s+=\\s+.\\sname\\s+=\\s+\"([\\w\\d\\s-\\/]*)\"", RegexOptions.Singleline);
-                LuaFile lua = new LuaFile("-", false, transmissionNameMatch.Groups[1].Value, File.ReadAllText(fi.FullName), "");
-                if (!currentTransmission.Contains(lua)) {
-                    currentTransmission.Add(lua);
+                //Match transmissionNameMatch = Regex.Match(fileContent, "params\\s+=\\s+.\\sname\\s+=\\s+\"([\\w\\d\\s-\\/\\*-\\.]*)\",.+?text\\s+=\\s+\"([\\w\\d\\s-\\/\\*-\\.]*)\"\\s*},", RegexOptions.Singleline);
+                Match transmissionNameMatch = Regex.Match(fileContent, nameAndTextRegex, RegexOptions.Singleline);
+                string transmissionName = transmissionNameMatch.Groups[2].Value;
+                if (!currentTransmission.Any(x => x.TransmissionName == transmissionName && transmissionName.Length > 0)) {
+                    currentTransmission.Add(new LuaFile("-", false, transmissionName, File.ReadAllText(fi.FullName), ""));
                 }
             }
         }
