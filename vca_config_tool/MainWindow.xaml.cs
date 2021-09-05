@@ -12,8 +12,8 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net;
 using ComboBox = System.Windows.Controls.ComboBox;
-using System.Windows.Media;
 using System.Collections.ObjectModel;
+using System.Windows.Forms;
 
 namespace vca_config_tool {
     /// <summary>
@@ -24,38 +24,27 @@ namespace vca_config_tool {
         private string zipFilePath = string.Empty;
         private string luaFilePath = string.Empty;
         private string zipPath = string.Empty;
-        private List<LuaFile> luaAL = new List<LuaFile>();
-        private List<LuaFile> checkedList = new List<LuaFile>();
-        private List<LuaFile> unCheckedList = new List<LuaFile>();
+        private List<LuaFile> removeTransmissionList = new List<LuaFile>();
+        private List<LuaFile> addTransmissionList = new List<LuaFile>();
         private ObservableCollection<LuaFile> currentTransmission = new ObservableCollection<LuaFile>();
         private string currentVCATransmissionFileString;
         private static WebClient wc = new WebClient();
 
         public MainWindow() {
             InitializeComponent();
-            //wtransmissionListView.ItemsSource = luaAL;
+            //transmissionListView.ItemsSource = removeTransmissionList;
             // Create the needed subfolder for the zip and transmission part
-            //eateSubFolders();
-            //ClearFolder(currentScriptPath + "VCA");
+            //CreateSubFolders();
+            ClearFolder(currentScriptPath + "VCA");
 
             // We unzip the file in the VCA folder and know we have this lua file
             luaFilePath = currentScriptPath + "VCA\\vehicleControlAddonTransmissions.lua";
-
-            // Read in from all selected transmission of the combobox and iterat over it
-            // TODO: Check which exists
-            //var newTransmission = File.ReadAllText("C:\\Users\\Andre\\source\\repos\\vca-config-tool\\Renault_Ares_836_GIMA_Quadrishift.lua");
             Console.WriteLine("Fin");
-
-        }
-
-        private void DownloadButtonClick(object sender, RoutedEventArgs e) {
-            //DownloadGithubTransmissionAsync();
-            ReadDownloadedTransmissions();
         }
 
         private void SelectZipButtonClick(object sender, RoutedEventArgs e) {
             // Selecting the path to the vca zip file
-           /** using (OpenFileDialog openFileDialog = new OpenFileDialog()) {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog()) {
                 openFileDialog.InitialDirectory = "C:\\Users\\Andre\\source\\repos";
                 openFileDialog.Filter = "Zipfile|*.zip";
 
@@ -65,13 +54,23 @@ namespace vca_config_tool {
                 }
             }
             UnzipFile(zipFilePath);
-           */
+
             // Read the current transmission file
             currentVCATransmissionFileString = File.ReadAllText(luaFilePath, Encoding.UTF8);
             currentTransmission = GetAllUsedTransmissions();
             transmissionListView.ItemsSource = currentTransmission;
             DownloadBtn.IsEnabled = true;
             ZipFileBtn.IsEnabled = true;
+        }
+
+        private void DownloadButtonClick(object sender, RoutedEventArgs e) {
+            //DownloadGithubTransmissionAsync();
+            ReadDownloadedTransmissions();
+        }
+
+        private void DoActionAndZipFile(object sender, RoutedEventArgs e) {
+            IterateOverSelection();
+            ZippingFile();
         }
 
         /// <summary>
@@ -85,31 +84,50 @@ namespace vca_config_tool {
             
         }
 
+        /// <summary>
+        /// Create the zip file from the unzipped file
+        /// </summary>
         private void ZippingFile() {
-            ZipFile.CreateFromDirectory("VCA\\", zipPath);
+            ZipFile.CreateFromDirectory("VCA\\", zipPath + "edit");
         }
 
         /// <summary>
         /// Iterate over the combobox
         /// </summary>
         /// <param name="selectedItems"></param>
-        private void IterateOverSelection(List<LuaFile> selectedItems) {
-            foreach (LuaFile lua in selectedItems) {
-                AddTransmission(lua.Transmission);
+        private void IterateOverSelection() {
+            if (addTransmissionList.Count > 0) {
+                string allAddTranmissions = string.Empty;
+                foreach (LuaFile lua in addTransmissionList) {
+                    allAddTranmissions += lua.Transmission;
+                }
+                AddTransmission(allAddTranmissions);
+                currentVCATransmissionFileString = File.ReadAllText(luaFilePath, Encoding.UTF8);
+            }
+            if (removeTransmissionList.Count > 0) {
+                foreach (LuaFile lua in removeTransmissionList) {
+                    RemoveTransmission(lua.Transmission);
+                    currentVCATransmissionFileString = File.ReadAllText(luaFilePath, Encoding.UTF8);
+                }
             }
         }
 
         /// <summary>
-        /// Add every transmission to the lua file
+        /// Add every transmission which is choosen in the dropdown (Add)
         /// </summary>
         /// <param name="fileName"></param>
-        private void AddTransmission(string fileName) {
+        private void AddTransmission(string luaTransmissionString) {
+            var result = Regex.Replace(currentVCATransmissionFileString, "{.+class.+=.+vehicleControlAddonTransmissionBase,.+\r\n.*params.=.+name.+=.+\"OWN\"", @"" + luaTransmissionString + "$&");
+            File.WriteAllText(luaFilePath, result);
+        }
 
-            var result = Regex.Replace(currentVCATransmissionFileString, "{.+class.+=.+vehicleControlAddonTransmissionBase,.+\r\n.*params.=.+name.+=.+\"OWN\"", @"" + fileName + "$&");
-
-            // Write the result to a temp file
-            // TODO: In future correct target
-            File.WriteAllText("C:\\Users\\Andre\\source\\repos\\vca-config-tool\\vehicleControlAddonTransmissions_edit.lua", result);
+        /// <summary>
+        /// Remove every transmission which is choosen in the dropdown (Remove)
+        /// </summary>
+        /// <param name="luaTransmissionString"></param>
+        private void RemoveTransmission(string luaTransmissionString) {
+            var result = currentVCATransmissionFileString.Replace(luaTransmissionString, "");
+            File.WriteAllText(luaFilePath, result);
         }
 
         /// <summary>
@@ -125,11 +143,9 @@ namespace vca_config_tool {
                 if(match.Groups[1].Value != "OWN") {
                     Match matchTransmission = Regex.Match(currentVCATransmissionFileString, "(\\s+\\{\\s+class\\s+=\\s+vehicleControlAddonTransmissionBase,\\s+params\\s+=\\s+\\{\\s+name\\s+=\\s+\\\"" + match.Groups[1].Value + "\\\".*text\\s+=\\s+\\\"" + match.Groups[2].Value + "\\\"\\s+\\},)", RegexOptions.Singleline);
                     Console.WriteLine(matchTransmission.Groups[1].Value);
-                    luaAL.Add(new LuaFile("Exists", true, match.Groups[1].Value, matchTransmission.Groups[1].Value, ""));
                     listTransmission.Add(new LuaFile("Exists", true, match.Groups[1].Value, matchTransmission.Groups[1].Value, ""));
                 }
             }
-            //transmissionListView.ItemsSource = listTransmission;
             return listTransmission;
         }
 
@@ -162,11 +178,13 @@ namespace vca_config_tool {
         private void ReadDownloadedTransmissions() {
             DirectoryInfo tmpDir = new DirectoryInfo(currentScriptPath + "tmp");
             foreach(FileInfo fi in tmpDir.GetFiles()) {
-                luaAL.Add(new LuaFile("-", false, fi.Name.Split('.')[0], File.ReadAllText(fi.FullName), ""));
-                currentTransmission.Add(new LuaFile("-", false, fi.Name.Split('.')[0], File.ReadAllText(fi.FullName), ""));
+                string fileContent = File.ReadAllText(fi.FullName);
+                Match transmissionNameMatch = Regex.Match(fileContent, "params\\s+=\\s+.\\sname\\s+=\\s+\"([\\w\\d\\s-\\/]*)\"", RegexOptions.Singleline);
+                LuaFile lua = new LuaFile("-", false, transmissionNameMatch.Groups[1].Value, File.ReadAllText(fi.FullName), "");
+                if (!currentTransmission.Contains(lua)) {
+                    currentTransmission.Add(lua);
+                }
             }
-            //transmissionListView.ItemsSource = null;
-            //transmissionListView.ItemsSource = luaAL;
         }
 
         private void DownloadGithubTransmissionAsync() {
@@ -197,41 +215,31 @@ namespace vca_config_tool {
             }
         }
 
-        private void SetAction(object sender, RoutedEventArgs e) {
-            
-        }
-
         private void cbAction_SelectionChanged(object sender, SelectionChangedEventArgs e) {
         }
 
         private void cbAction_DropDownClosed(object sender, EventArgs e) {
             ComboBox cb = sender as ComboBox;
-            Console.WriteLine(transmissionListView.SelectedItem);
-            ListViewItem lvi = cb.;
-            transmissionListView.Items.CurrentItem.
-            Console.WriteLine(cb.SelectedItem);
-        }
+            LuaFile currentItem = (LuaFile)cb.DataContext;
+            LuaFile updateItem = (LuaFile)cb.DataContext;
+            string currentNextAction = currentItem.NextAction;
+            updateItem.NextAction = cb.SelectedItem.ToString();
+            string updateNextAction = updateItem.NextAction;
+            currentTransmission.Insert(currentTransmission.IndexOf(currentItem), updateItem);
+            currentTransmission.Remove(currentItem);
 
-        /*private void CheckBox_Checked(object sender, RoutedEventArgs e) {
-            ListViewItem listViewItem = GetVisualAncestor<ListViewItem>((DependencyObject)sender);
-
-            transmissionListView.SelectedValue = transmissionListView.ItemContainerGenerator.ItemFromContainer(listViewItem);
-            LuaFile selectedItem = (LuaFile)transmissionListView.SelectedItem;
-            if(selectedItem.TransmissionName.Equals("IVT")) {
-                
+            if (updateNextAction.Equals("Remove") && currentNextAction != updateNextAction) {
+                removeTransmissionList.Add(updateItem);
+            } else if (currentNextAction.Equals("Remove") && updateNextAction.Equals("Exists")) {
+                removeTransmissionList.Remove(updateItem);
             }
-            if (checkedList.Contains(selectedItem)) {
-                checkedList.Remove(selectedItem);
-            } else {
-                checkedList.Add(selectedItem);
-            }
-        }
-        private static T GetVisualAncestor<T>(DependencyObject o) where T : DependencyObject {
-            do {
-                o = VisualTreeHelper.GetParent(o);
-            } while (o != null && !typeof(T).IsAssignableFrom(o.GetType()));
 
-            return (T)o;
-        }*/
+            if (updateNextAction.Equals("Add") && currentNextAction != updateNextAction) {
+                addTransmissionList.Add(updateItem);
+            } else if (currentNextAction.Equals("Add") && updateNextAction.Equals("-")) {
+                addTransmissionList.Remove(updateItem);
+            }
+            Console.WriteLine("Size of removeTL: " + removeTransmissionList.Count + "\nSize of addTL: " + addTransmissionList.Count);
+        }
     } 
 }

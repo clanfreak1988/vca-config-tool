@@ -32,9 +32,7 @@ namespace vca_config_tool {
            nextAction = action;
         }
 
-        public LuaFile(bool existing, string nameOfFile) {
-            exists = existing;
-            transmissionName = nameOfFile;
+        public LuaFile() {
         }
 
         public string TransmissionName {
