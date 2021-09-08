@@ -43,8 +43,13 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            <!--<StatusBar Name="SBar" Grid.Column="0" Grid.Row="5" VerticalAlignment="Bottom" Background="LightBlue">
+                <StatusBarItem>
+                    <TextBlock>Status:</TextBlock>
+                </StatusBarItem>
+            </StatusBar>-->
+            <ProgressBar x:Name="pb_LengthyTaskProgress" Grid.Column="0" VerticalAlignment="Bottom" Margin="10,0" Background="LightBlue" Height="20"/>
+            <TextBlock x:Name="tb_Progress" Grid.Column="0" VerticalAlignment="Bottom" Margin="10,5" HorizontalAlignment="Center"></TextBlock>
         </Grid>
-
-
     </Border>
 </Window>

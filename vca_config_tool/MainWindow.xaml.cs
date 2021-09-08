@@ -15,6 +15,10 @@ using System.Net;
 using ComboBox = System.Windows.Controls.ComboBox;
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
+using ProgressBar = System.Windows.Controls.ProgressBar;
+using Orientation = System.Windows.Controls.Orientation;
+using System.Windows.Media.Animation;
+using System.Threading.Tasks;
 
 namespace vca_config_tool {
     /// <summary>
@@ -34,9 +38,9 @@ namespace vca_config_tool {
 
         public MainWindow() {
             InitializeComponent();
-            //transmissionListView.ItemsSource = removeTransmissionList;
+
             // Create the needed subfolder for the zip and transmission part
-            //CreateSubFolders();
+            CreateSubFolders();
             ClearFolder(currentScriptPath + "VCA");
 
             // We unzip the file in the VCA folder and know we have this lua file
@@ -65,14 +69,16 @@ namespace vca_config_tool {
             ZipFileBtn.IsEnabled = true;
         }
 
-        private void DownloadButtonClick(object sender, RoutedEventArgs e) {
-            //DownloadGithubTransmissionAsync();
+        private void DownloadButtonClick(object sender, RoutedEventArgs e) {          
+            DownloadGithubTransmission();
             ReadDownloadedTransmissions();
         }
 
         private void DoActionAndZipFile(object sender, RoutedEventArgs e) {
             IterateOverSelection();
             ZippingFile();
+            tb_Progress.Text = "Zipping finish";
+            ZipFileBtn.IsEnabled = false;
         }
 
         /// <summary>
@@ -83,7 +89,7 @@ namespace vca_config_tool {
             Directory.CreateDirectory("VCA");
             string targetPath = currentScriptPath + "VCA\\";
             ZipFile.ExtractToDirectory(pathToZip, targetPath);
-            
+            SelectZipBtn.IsEnabled = false;
         }
 
         /// <summary>
@@ -193,7 +199,9 @@ namespace vca_config_tool {
             }
         }
 
-        private void DownloadGithubTransmissionAsync() {
+        private void DownloadGithubTransmission() {
+            int i = 1;
+            pb_LengthyTaskProgress.Value = 0;
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.UserAgent.Add(
                 new ProductInfoHeaderValue("MyApplication", "1"));
@@ -209,9 +217,13 @@ namespace vca_config_tool {
                     Console.WriteLine($"DIR: {directoryContentsUrl}");
                     var contentsJson2 = httpClient.GetStringAsync(contentsUrl + "\\" + (string)file["name"]).GetAwaiter().GetResult();
                     var content = (JArray)JsonConvert.DeserializeObject(contentsJson2);
+                    pb_LengthyTaskProgress.Maximum = content.Count;
                     foreach (var file2 in content) {
                         var uri = new Uri((string)file2["download_url"]);
                         wc.DownloadFile(uri, currentScriptPath + "tmp\\" + (string)file2["name"]);
+                        pb_LengthyTaskProgress.Value = i;
+                        tb_Progress.Text = i + " from " + content.Count;
+                        i++;
                     }
                 } else if (fileType == "file") {
                     var downloadUrl = (string)file["download_url"];
@@ -219,6 +231,7 @@ namespace vca_config_tool {
                     Console.WriteLine($"DOWNLOAD: {downloadUrl}");
                 }
             }
+            DownloadBtn.IsEnabled = false;
         }
 
         private void cbAction_SelectionChanged(object sender, SelectionChangedEventArgs e) {
