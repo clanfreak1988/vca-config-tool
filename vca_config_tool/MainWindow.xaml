@@ -13,22 +13,23 @@
         Background="Transparent"
         >
     <Border
-        Background="#3B28CC"
-        CornerRadius="20"
+        
         >
         <Grid>
-            <Button x:Name="SelectZipBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="20,10,0,380" Click="SelectZipButtonClick">Select Zip</Button>
-            <Button x:Name="DownloadBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="120,10,0,380" Click="DownloadButtonClick">
+            <Button x:Name="SelectZipBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="20,10,0,380" Click="SelectZipButtonClick" VerticalAlignment="Top">1. Select Zip</Button>
+            <Button x:Name="DownloadBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="120,10,0,380" Click="DownloadButtonClick" VerticalAlignment="Top">
                 <Button.IsEnabled>
                     <System:Boolean>false</System:Boolean>
-                </Button.IsEnabled> Download
+                </Button.IsEnabled>
+                2. Download
             </Button>
-            <Button x:Name="ZipFileBtn" Width="110" Height="20" HorizontalAlignment="Left" Margin="220,10,0,380" Click="DoActionAndZipFile">
+            <Button x:Name="ZipFileBtn" Width="110" Height="20" HorizontalAlignment="Left" Margin="220,10,0,380" Click="DoActionAndZipFile" VerticalAlignment="Top">
                 <Button.IsEnabled>
                     <System:Boolean>false</System:Boolean>
-                </Button.IsEnabled> Add and Zip File
+                </Button.IsEnabled>
+                3. Add and Zip File
             </Button>
-            <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Height="300" Width="400" Margin="20,58,0,0" VerticalAlignment="Top">
+            <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Height="330" Width="400" Margin="20,58,0,0" VerticalAlignment="Top">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Transmission Name" Width="Auto" DisplayMemberBinding="{Binding TransmissionName}">
@@ -43,6 +44,17 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+            <Label VerticalAlignment="Top" Margin="450,60,0,0">
+                <TextBlock Foreground="White">
+                    1. Select your VCA Zip File<LineBreak/>
+                    2. Download transmission from github:<LineBreak/>
+                    https://github.com/clanfreak1988/VCA_gearbox_collection<LineBreak/>
+                    3. Select your action add or remove the transmission<LineBreak/>
+                    4. Finish the work and Zip the new tranmission, will overwrite the existing one</TextBlock>
+            </Label>
+            <Label VerticalAlignment="Top" Margin="450,80,0,0">
+                <TextBlock TextWrapping="Wrap" Width="432"></TextBlock>
+            </Label>
             <!--<StatusBar Name="SBar" Grid.Column="0" Grid.Row="5" VerticalAlignment="Bottom" Background="LightBlue">
                 <StatusBarItem>
                     <TextBlock>Status:</TextBlock>
