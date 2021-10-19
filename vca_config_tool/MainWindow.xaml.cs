@@ -99,9 +99,8 @@ namespace vca_config_tool {
         /// Create the zip file from the unzipped file
         /// </summary>
         private void ZippingFile() {
-            //File.Delete(zipPath);
-            var rand = new Random();
-            ZipFile.CreateFromDirectory("VCA\\", zipPath + rand.Next() + ".zip");
+            File.Delete(zipPath);
+            ZipFile.CreateFromDirectory("VCA\\", zipPath + ".zip");
         }
 
         /// <summary>
