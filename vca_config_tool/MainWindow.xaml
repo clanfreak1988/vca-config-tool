@@ -6,15 +6,16 @@
         xmlns:local="clr-namespace:vca_config_tool"
         xmlns:System="clr-namespace:System;assembly=mscorlib" xmlns:Properties="clr-namespace:vca_config_tool.Properties" x:Class="vca_config_tool.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" 
-        Height="450" 
-        Width="900"
+        Title="VCA Transmission Tool Configurator" 
+        Height="455" 
+        Width="910"
+        MinHeight="455"
+        MinWidth="910"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
+        Icon="VCA_CT_2.ico"
         >
-    <Border
-        
-        >
+    <Border>
         <Grid>
             <Button x:Name="SelectZipBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="20,10,0,380" Click="SelectZipButtonClick" VerticalAlignment="Top">1. Select Zip</Button>
             <Button x:Name="DownloadBtn" Width="80" Height="20" HorizontalAlignment="Left" Margin="120,10,0,380" Click="DownloadButtonClick" VerticalAlignment="Top">
@@ -23,13 +24,13 @@
                 </Button.IsEnabled>
                 2. Download
             </Button>
-            <Button x:Name="ZipFileBtn" Width="110" Height="20" HorizontalAlignment="Left" Margin="220,10,0,380" Click="DoActionAndZipFile" VerticalAlignment="Top">
+            <Button x:Name="ZipFileBtn" Height="20" Margin="220,10,572,0" Click="DoActionAndZipFile" VerticalAlignment="Top" HorizontalAlignment="Left">
                 <Button.IsEnabled>
                     <System:Boolean>false</System:Boolean>
                 </Button.IsEnabled>
                 3. Add and Zip File
             </Button>
-            <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Height="330" Width="400" Margin="20,58,0,0" VerticalAlignment="Top">
+            <ListView x:Name="transmissionListView" HorizontalAlignment="Left" Width="528" Margin="20,58,0,5">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Transmission Name" Width="Auto" DisplayMemberBinding="{Binding TransmissionName}">
@@ -44,24 +45,18 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-            <Label VerticalAlignment="Top" Margin="450,60,0,0">
-                <TextBlock Foreground="White">
+            <Label VerticalAlignment="Top" HorizontalAlignment="Right" Margin="553,10,-10,0" Height="180">
+                <TextBlock Foreground="White" Width="327" Height="150">
                     1. Select your VCA Zip File<LineBreak/>
                     2. Download transmission from github:<LineBreak/>
                     https://github.com/clanfreak1988/VCA_gearbox_collection<LineBreak/>
                     3. Select your action add or remove the transmission<LineBreak/>
-                    4. Finish the work and Zip the new tranmission, will overwrite the existing one</TextBlock>
+                    4. Finish the work and Zip the new tranmission,<LineBreak/> will overwrite the existing one</TextBlock>
             </Label>
-            <Label VerticalAlignment="Top" Margin="450,80,0,0">
-                <TextBlock TextWrapping="Wrap" Width="432"></TextBlock>
-            </Label>
-            <!--<StatusBar Name="SBar" Grid.Column="0" Grid.Row="5" VerticalAlignment="Bottom" Background="LightBlue">
-                <StatusBarItem>
-                    <TextBlock>Status:</TextBlock>
-                </StatusBarItem>
-            </StatusBar>-->
-            <ProgressBar x:Name="pb_LengthyTaskProgress" Grid.Column="0" VerticalAlignment="Bottom" Margin="10,0" Background="LightBlue" Height="20"/>
-            <TextBlock x:Name="tb_Progress" Grid.Column="0" VerticalAlignment="Bottom" Margin="10,5" HorizontalAlignment="Center"></TextBlock>
+            <ProgressBar x:Name="pb_LengthyTaskProgress" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="350,10,0,0" Background="LightBlue" Height="20" Width="100"/>
+            <TextBlock x:Name="tb_Progress" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="360,10,0,0"></TextBlock>
+            <Image Margin="575,121,71,47" Source="VCA_CT_2.ico" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+            <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" Foreground="White">Created by clanfreak1988@GitHub</Label>
         </Grid>
     </Border>
 </Window>

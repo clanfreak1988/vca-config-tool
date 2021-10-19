@@ -19,6 +19,7 @@ using ProgressBar = System.Windows.Controls.ProgressBar;
 using Orientation = System.Windows.Controls.Orientation;
 using System.Windows.Media.Animation;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace vca_config_tool {
     /// <summary>
@@ -37,6 +38,8 @@ namespace vca_config_tool {
         private readonly static string nameAndTextRegex = "params\\s+=\\s+.\\sname\\s+=\\s+\"([\\w\\d\\s-\\/\\*-\\.]*)\",.+?text\\s+=\\s+\"([\\w\\d\\s-\\/\\*-\\.]*)\"\\s*},";
 
         public MainWindow() {
+            Uri iconUri = new Uri("pack://application:,,,/VCA_CT_2.ico", UriKind.RelativeOrAbsolute);
+            this.Icon = BitmapFrame.Create(iconUri);
             InitializeComponent();
 
             // Create the needed subfolder for the zip and transmission part
