@@ -57,6 +57,7 @@
             <TextBlock x:Name="tb_Progress" Grid.Column="0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="360,10,0,0"></TextBlock>
             <Image Margin="575,121,71,47" Source="VCA_CT_2.ico" Stretch="None" HorizontalAlignment="Right" VerticalAlignment="Top"/>
             <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" Foreground="White">Created by clanfreak1988@GitHub</Label>
+            <Label HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="White" Margin="0,398,194,0">Version 1.1</Label>
         </Grid>
     </Border>
 </Window>

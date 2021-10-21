@@ -100,7 +100,7 @@ namespace vca_config_tool {
         /// </summary>
         private void ZippingFile() {
             File.Delete(zipPath);
-            ZipFile.CreateFromDirectory("VCA\\", zipPath + ".zip");
+            ZipFile.CreateFromDirectory("VCA\\", zipPath);
         }
 
         /// <summary>
